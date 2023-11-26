@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Information</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f8f8;
+    }
+
+    #networkInfo {
+      max-width: 800px;
+      margin: 50px auto;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    p {
+      margin: 10px 0;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="networkInfo"></div>
+
+  
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const networkInfoElement = document.getElementById('networkInfo');
+
+      const batteryInfo = navigator.battery || navigator.webkitBattery || navigator.mozBattery;
+      const batteryLevel = batteryInfo ? batteryInfo.level * 100 + '%' : 'Not available';
+      const isCharging = batteryInfo ? batteryInfo.charging : 'Not available';
+
+      const webpDataURL = document.createElement('canvas').toDataURL('image/webp');
+      const webpSupported = webpDataURL.startsWith('data:image/webp');
+
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Not available';
+      const sensorSupport = 'ondeviceorientation' in window ? 'Yes' : 'No';
+
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const renderer = gl.getParameter(gl.RENDERER) || 'Not available';
+      const vendor = gl.getParameter(gl.VENDOR) || 'Not available';
+
+      const rendererInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const unmaskedRenderer = rendererInfo ? gl.getParameter(rendererInfo.UNMASKED_RENDERER_WEBGL) : 'Not available';
+      const unmaskedVendor = rendererInfo ? gl.getParameter(rendererInfo.UNMASKED_VENDOR_WEBGL) : 'Not available';
+
+      const processorCount = navigator.hardwareConcurrency || 'Not available';
+      const userAgent = navigator.userAgent || 'Not available';
+
+      // Attempt to extract manufacturer, frequency, and model from userAgent
+      const processorDetails = extractProcessorDetails(userAgent);
+      const memoryInfo = {
+        totalJSHeapSize: (performance.memory && performance.memory.totalJSHeapSize) || 'Not available',
+        usedJSHeapSize: (performance.memory && performance.memory.usedJSHeapSize) || 'Not available',
+        jsHeapSizeLimit: (performance.memory && performance.memory.jsHeapSizeLimit) || 'Not available',
+      };
+
+      let publicIP = 'Not available';
+      // Use a CORS-compatible service to get public IP
+      fetch('https://api64.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+          publicIP = data.ip || 'Not available';
+          displayNetworkInfo();
+        })
+        .catch(error => {
+          console.error('Error fetching IP address:', error);
+          displayNetworkInfo(); // Show information without public IP address
+        });
+
+      const networkInfo = {
+        connectionType: navigator.connection.type || 'Not available',
+        effectiveConnectionType: navigator.connection.effectiveType || 'Not available',
+        connectionSpeed: navigator.connection.downlink || 'Not available',
+        onlineStatus: navigator.onLine ? 'Online' : 'Offline',
+        screenWidth: window.screen.width || 'Not available',
+        screenHeight: window.screen.height || 'Not available',
+        browserLanguage: navigator.language || 'Not available',
+        platform: navigator.platform || 'Not available',
+        deviceType: navigator.deviceType || 'Not available',
+        browserVersion: navigator.appVersion || 'Not available',
+        languages: navigator.languages ? navigator.languages.join(', ') : 'Not available',
+        userAgent: navigator.userAgent || 'Not available',
+        windowWidth: window.innerWidth || 'Not available',
+        windowHeight: window.innerHeight || 'Not available',
+        screenAvailWidth: window.screen.availWidth || 'Not available',
+        screenAvailHeight: window.screen.availHeight || 'Not available',
+        theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+        deviceOrientation: window.orientation || 'Not available',
+        maxTouchPoints: navigator.maxTouchPoints || 'Not available',
+        batteryLevel: batteryLevel,
+        isCharging: isCharging,
+        hasMediaDevices: navigator.mediaDevices && 'enumerateDevices' in navigator.mediaDevices,
+        speechSynthesisSupported: 'speechSynthesis' in window,
+        bluetoothSupported: 'bluetooth' in navigator,
+        webSocketsSupported: 'WebSocket' in window,
+        webRtcSupported: 'RTCPeerConnection' in window,
+        mediaElementSupported: 'HTMLMediaElement' in window,
+        geolocationSupported: 'geolocation' in navigator,
+        cacheApiSupported: 'caches' in window,
+        serviceWorkersSupported: 'serviceWorker' in navigator,
+        webAssemblySupported: 'WebAssembly' in window,
+        localStorageSupported: 'localStorage' in window,
+        webWorkersSupported: 'Worker' in window,
+        mediaDevicesSupported: navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices,
+        keyboardEventSupported: 'KeyboardEvent' in window,
+        touchpadSupported: 'ontouchstart' in window,
+        borderRadiusSupported: CSS.supports('border-radius', '1px'),
+        webpSupported: webpSupported,
+        requestAnimationFrameSupported: 'requestAnimationFrame' in window,
+        cookiesEnabled: navigator.cookieEnabled,
+        webShareAPISupported: 'share' in navigator,
+        cacheStorageInfo: window.caches && window.caches.keys ? window.caches.keys() : 'Not available',
+        publicIP: 'Not available', // Отримується через серверну сторону
+        userTimezone: userTimezone,
+        sensorSupport: sensorSupport,
+        graphicsRenderer: renderer,
+        graphicsVendor: vendor,
+        unmaskedRenderer: unmaskedRenderer,
+        unmaskedVendor: unmaskedVendor,
+        processorCount: processorCount,
+        processorManufacturer: processorDetails.manufacturer || 'Not available',
+        processorFrequency: processorDetails.frequency || 'Not available',
+        processorModel: processorDetails.model || 'Not available',
+        totalJSHeapSize: memoryInfo.totalJSHeapSize,
+        usedJSHeapSize: memoryInfo.usedJSHeapSize,
+        jsHeapSizeLimit: memoryInfo.jsHeapSizeLimit,
+      };
+
+      // Displaying the network information
+      networkInfoElement.innerHTML = `
+        <h2>Інформація про мережу та пристрій:</h2>
+        <p><strong>Тип мережі:</strong> ${networkInfo.connectionType}</p>
+        <p><strong>Ефективний тип мережі:</strong> ${networkInfo.effectiveConnectionType}</p>
+        <p><strong>Швидкість з'єднання (Mbps):</strong> ${networkInfo.connectionSpeed}</p>
+        <p><strong>Стан з'єднання:</strong> ${networkInfo.onlineStatus}</p>
+        <p><strong>Розмір екрану (ширина x висота):</strong> ${networkInfo.screenWidth} x ${networkInfo.screenHeight}</p>
+        <!-- Додані параметри -->
+        <p><strong>Мова браузера:</strong> ${networkInfo.browserLanguage}</p>
+        <p><strong>Платформа:</strong> ${networkInfo.platform}</p>
+        <p><strong>Тип пристрою:</strong> ${networkInfo.deviceType}</p>
+        <p><strong>Версія браузера:</strong> ${networkInfo.browserVersion}</p>
+        <p><strong>Мови браузера:</strong> ${networkInfo.languages}</p>
+        <p><strong>UA-рядок:</strong> ${networkInfo.userAgent}</p>
+        <p><strong>Розмір вікна браузера (ширина x висота):</strong> ${networkInfo.windowWidth} x ${networkInfo.windowHeight}</p>
+        <p><strong>Доступний розмір екрану (ширина x висота):</strong> ${networkInfo.screenAvailWidth} x ${networkInfo.screenAvailHeight}</p>
+        <p><strong>Тема оформлення:</strong> ${networkInfo.theme}</p>
+        <p><strong>Орієнтація пристрою:</strong> ${networkInfo.deviceOrientation}</p>
+        <p><strong>Підтримка тачскріну:</strong> ${networkInfo.maxTouchPoints}</p>
+        <p><strong>Рівень заряду батареї:</strong> ${networkInfo.batteryLevel}</p>
+        <p><strong>Заряджається:</strong> ${networkInfo.isCharging}</p>
+        <p><strong>Підтримка медіапристроїв:</strong> ${networkInfo.hasMediaDevices}</p>
+        <p><strong>Підтримка синтезу мовлення:</strong> ${networkInfo.speechSynthesisSupported}</p>
+        <p><strong>Підтримка Bluetooth:</strong> ${networkInfo.bluetoothSupported}</p>
+        <p><strong>Підтримка WebSockets:</strong> ${networkInfo.webSocketsSupported}</p>
+        <p><strong>Підтримка WebRTC:</strong> ${networkInfo.webRtcSupported}</p>
+        <p><strong>Відтворення аудіо та відео:</strong> ${networkInfo.mediaElementSupported}</p>
+        <p><strong>Підтримка геолокації:</strong> ${networkInfo.geolocationSupported}</p>
+        <p><strong>Підтримка кешу:</strong> ${networkInfo.cacheApiSupported}</p>
+        <p><strong>Підтримка Service Workers:</strong> ${networkInfo.serviceWorkersSupported}</p>
+        <p><strong>Підтримка WebAssembly:</strong> ${networkInfo.webAssemblySupported}</p>
+        <p><strong>Підтримка Local Storage:</strong> ${networkInfo.localStorageSupported}</p>
+        <p><strong>Підтримка Web Workers:</strong> ${networkInfo.webWorkersSupported}</p>
+        <p><strong>Доступність мікрофону та камери:</strong> ${networkInfo.mediaDevicesSupported}</p>
+        <p><strong>Підтримка подій клавіш:</strong> ${networkInfo.keyboardEventSupported}</p>
+        <p><strong>Підтримка тачпаду:</strong> ${networkInfo.touchpadSupported}</p>
+        <p><strong>Підтримка властивостей CSS (border-radius):</strong> ${networkInfo.borderRadiusSupported}</p>
+        <p><strong>Підтримка WebP:</strong> ${networkInfo.webpSupported}</p>
+        <p><strong>Підтримка фреймів:</strong> ${networkInfo.requestAnimationFrameSupported}</p>
+        <p><strong>Можливість встановлення cookie:</strong> ${networkInfo.cookiesEnabled}</p>
+        <p><strong>Підтримка Web Share API:</strong> ${networkInfo.webShareAPISupported}</p>
+        <p><strong>Розмір кешу:</strong> ${networkInfo.cacheStorageInfo}</p>
+        <p><strong>Публічна IP-адреса:</strong> ${networkInfo.publicIP}</p>
+        <p><strong>Часовий пояс:</strong> ${networkInfo.userTimezone}</p>
+        <p><strong>Підтримка сенсорів:</strong> ${networkInfo.sensorSupport}</p>
+        <p><strong>Графічна карта:</strong> ${networkInfo.graphicsRenderer}</p>
+        <p><strong>Виробник графічної карти:</strong> ${networkInfo.graphicsVendor}</p>
+        <p><strong>Докладна модель графічної карти:</strong> ${networkInfo.unmaskedRenderer}</p>
+        <p><strong>Докладний виробник графічної карти:</strong> ${networkInfo.unmaskedVendor}</p>
+        <p><strong>Кількість логічних процесорів:</strong> ${networkInfo.processorCount}</p>
+        <p><strong>Виробник процесора:</strong> ${networkInfo.processorManufacturer}</p>
+        <p><strong>Частота процесора:</strong> ${networkInfo.processorFrequency}</p>
+        <p><strong>Модель процесора:</strong> ${networkInfo.processorModel}</p>
+        <p><strong>Загальний обсяг використовуваної пам'яті (JS Heap):</strong> ${networkInfo.usedJSHeapSize} bytes</p>
+        <p><strong>Загальний обсяг доступної пам'яті для JS Heap:</strong> ${networkInfo.totalJSHeapSize} bytes</p>
+        <p><strong>Ліміт обсягу пам'яті для JS Heap:</strong> ${networkInfo.jsHeapSizeLimit} bytes</p>
+      `;
+
+      
+      
+      function extractProcessorDetails(userAgent) {
+        const regex = /(?:Intel|AMD|Apple|ARM|Qualcomm|MediaTek|Samsung)/i;
+        const match = userAgent.match(regex);
+
+        return {
+          manufacturer: match ? match[0] : null,
+          frequency: null,
+          model: null,
+        };
+      }
+      
+      fetch('/networkInfo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(networkInfo),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.message);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+     
+    });
+  </script>
+</body>
+</html>
