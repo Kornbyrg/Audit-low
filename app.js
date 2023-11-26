@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // MongoDB connection string
-const mongoConnectionString = process.env.MONGODB_URI;
+const mongoConnectionString = MONGODB_URI;
 
 
 // Middleware to parse JSON in the request body
@@ -22,6 +22,10 @@ app.post('/networkInfo', async (req, res) => {
   let client;
 
   try {
+    if (!mongoConnectionString) {
+      console.error('MongoDB connection string is not provided.');
+      process.exit(1); // Exit the process if the connection string is missing
+    }
     // Connect to MongoDB
     client = new MongoClient(mongoConnectionString, {
       useNewUrlParser: true,
