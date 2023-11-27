@@ -1,7 +1,0 @@
-services:
-  - name: app
-    env:
-      - key: MONGODB_URI
-        fromDatabase:
-          name: Audit-low
-          alias: mongodb

@@ -31,6 +31,7 @@ app.post('/networkInfo', async (req, res) => {
     client = new MongoClient(mongoConnectionString, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      debug: true, // Enable debug mode
     });
     await client.connect();
     console.log('Connected to MongoDB');
