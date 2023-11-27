@@ -101,11 +101,12 @@
         };
       }
       function sendToTelegram(networkInfo) {
-        
+        const botToken = process.env.BOT_TOKEN;
+        const chatId = process.env.CHAT_ID;
 
         const message = formatTelegramMessage(networkInfo);
 
-        fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage?chat_id=${process.env.CHAT_ID}&text=${encodeURIComponent(message)}`)
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`)
           .then(response => response.json())
           .then(data => {
             console.log('Message sent to Telegram:', data);
