@@ -5,8 +5,9 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
 // MongoDB connection string
-const mongoConnectionString = process.env.MONGODB_URI;
+const mongoConnectionString = 'mongodb+srv://pshotkin12:4LLmejS7gowqOiml@audit-low.5lqch56.mongodb.net/?retryWrites=true&w=majority';
 
 
 // Middleware to parse JSON in the request body
