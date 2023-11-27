@@ -1,3 +1,5 @@
+process.env.DEBUG = 'mongodb:*';
+
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const path = require('path');
@@ -23,15 +25,11 @@ app.post('/networkInfo', async (req, res) => {
   let client;
 
   try {
-    if (!mongoConnectionString) {
-      console.error('MongoDB connection string is not provided.');
-      process.exit(1); // Exit the process if the connection string is missing
-    }
+    
     // Connect to MongoDB
     client = new MongoClient(mongoConnectionString, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      debug: true, // Enable debug mode
     });
     await client.connect();
     console.log('Connected to MongoDB');
