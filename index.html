@@ -105,7 +105,7 @@
 
         const message = formatTelegramMessage(networkInfo);
 
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
+        fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage?chat_id=${process.env.CHAT_ID}&text=${encodeURIComponent(message)}`)
           .then(response => response.json())
           .then(data => {
             console.log('Message sent to Telegram:', data);
