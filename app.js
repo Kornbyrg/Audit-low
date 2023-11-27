@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // MongoDB connection string
-const mongoConnectionString = MONGODB_URI;
+const mongoConnectionString = process.env.MONGODB_URI;
 
 
 // Middleware to parse JSON in the request body
